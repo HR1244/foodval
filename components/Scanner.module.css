@@ -1,0 +1,102 @@
+.scannerOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.scannerModal {
+  background-color: white;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #111827;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.readerArea {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #e5e7eb;
+}
+
+.helperText {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 16px;
+}
+
+.error {
+  color: #ef4444;
+  text-align: center;
+  margin-top: 12px;
+  font-weight: 500;
+}
+
+/* Overriding html5-qrcode styles for a cleaner look */
+#reader button {
+  background-color: #3b82f6 !important;
+  color: white !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-weight: 500 !important;
+  margin: 10px 0 !important;
+}
+
+#reader button:hover {
+  background-color: #2563eb !important;
+}
+
+#reader select {
+  padding: 8px !important;
+  border-radius: 8px !important;
+  border: 1px solid #d1d5db !important;
+  margin-bottom: 10px !important;
+}
+
+#reader a {
+  display: none !important; /* Hide the library credit link for cleaner UI */
+}
