@@ -24,12 +24,11 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <head>
         {adSensePubId && (
-          <Script
+          <script
             async
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSensePubId}`}
             crossOrigin="anonymous"
-            strategy="lazyOnload"
-          />
+          ></script>
         )}
       </head>
       <body>{children}</body>

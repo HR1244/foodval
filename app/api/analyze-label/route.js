@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
@@ -12,14 +12,12 @@ export async function POST(req) {
     // Strip the data:image/...;base64, prefix if present
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: 'GEMINI_API_KEY is not configured on the server.' }, { status: 500 });
+      return NextResponse.json({ error: 'GROQ_API_KEY is not configured on the server.' }, { status: 500 });
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    // Use gemini-flash-latest to automatically use the best available Flash model in the current API
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+    const groq = new Groq({ apiKey });
 
     const prompt = `
       You are an expert food nutritionist and label reader. I have provided an image of a product (which may contain the front label, ingredients list, or nutrition facts).
@@ -49,34 +47,42 @@ export async function POST(req) {
           "sugar": "e.g., 15g"
         },
         "tags": ["array of tags"],
+        "healthAssessment": {
+          "score": number, // Health score from 0 (very unhealthy) to 100 (very healthy)
+          "summary": "Short 1-line summary (e.g., 'Occasional treat only' or 'Empty calories')",
+          "reasons": [
+            { "type": "positive", "text": "High in protein", "impact": 10 },
+            { "type": "negative", "text": "Extremely high added sugar", "impact": -30 }
+          ]
+        },
         "alternatives": [] 
       }
 
-      Important Tagging Rules for the "tags" array:
-      - If it has > 10g sugar per 100g, add "high_added_sugar", else if > 0 add "added_sugar".
-      - If it has > 400mg sodium per 100g, add "high_sodium".
-      - If ingredients contain Palm Oil, add "palm_oil".
-      - If ingredients contain Maida or Refined Wheat Flour, add "refined_flour".
-      - If ingredients contain Artificial Colors (like INS 102, INS 110), add "artificial_colors".
-      - If ingredients contain Artificial Flavors, add "artificial_flavors".
-      - If ingredients contain Preservatives (like INS 211, INS 202), add "preservatives".
-      - If it has > 10g protein per 100g, add "high_protein".
-      - If it has < 3g protein per 100g, add "low_protein".
-      - If it has > 5g fiber per 100g, add "high_fiber".
-      - If ingredients contain Whole Wheat or Millet as the primary ingredient, add "whole_grain".
+      Important Assessment Rules:
+      - Act as a strict, expert nutritionist.
+      - Heavily penalize ultra-processed foods, high added sugars, artificial sweeteners, harmful emulsifiers, palm oil, and refined flours (Maida).
+      - Ensure the "score" realistically reflects the healthiness (e.g., Coca Cola should be < 30).
+      - In the "reasons" array, include specific contextual positive and negative reasons for your score (minimum 1, maximum 5 total reasons). The "impact" is just an indicative number (-50 to +50) showing how heavily it affected your score.
 
       Respond ONLY with the JSON object. Do not wrap it in markdown block quotes (\`\`\`json). Just return the raw JSON.
     `;
 
-    const imagePart = {
-      inlineData: {
-        data: base64Data,
-        mimeType: "image/jpeg" 
-      }
-    };
-
-    const result = await model.generateContent([prompt, imagePart]);
-    const responseText = result.response.text();
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            { 
+              type: "image_url", 
+              image_url: { url: `data:image/jpeg;base64,${base64Data}` } 
+            }
+          ]
+        }
+      ],
+      model: "llama-3.2-11b-vision-preview",
+    });
+    const responseText = chatCompletion.choices[0].message.content;
     
     // Parse the JSON from the response
     let productData;
