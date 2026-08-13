@@ -81,7 +81,7 @@ export async function POST(req) {
           ]
         }
       ],
-      model: "llama-3.2-11b-vision-preview",
+      model: "qwen/qwen3.6-27b",
     });
     const responseText = chatCompletion.choices[0].message.content;
     
