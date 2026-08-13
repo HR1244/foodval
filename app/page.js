@@ -9,11 +9,9 @@ import CameraCapture from '../components/CameraCapture';
 export default function Home() {
   const router = useRouter();
   
-  const [showCamera, setShowCamera] = useState(false);
   const [error, setError] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const handleCameraCapture = async (base64Data) => {
-    setShowCamera(false);
     setIsAnalyzing(true);
     setError('');
 
@@ -57,32 +55,13 @@ export default function Home() {
         </p>
       </div>
 
-      <div className={styles.searchContainer} style={{ justifyContent: 'center' }}>
-        <div className={styles.actionButtons} style={{ width: '100%', maxWidth: '400px' }}>
-          <button 
-            className={`${styles.scanButton} ${styles.aiButton}`}
-            style={{ width: '100%', padding: '20px', fontSize: '1.2rem' }}
-            onClick={() => setShowCamera(true)}
-            disabled={isAnalyzing}
-          >
-            {isAnalyzing ? (
-              <Loader2 size={24} className={styles.spinner} />
-            ) : (
-              <Camera size={24} />
-            )}
-            <span>{isAnalyzing ? 'Analyzing...' : 'Snap Food'}</span>
-          </button>
-        </div>
-      </div>
-
-      {error && <div className={styles.errorMessage}>{error}</div>}
-
-      {showCamera && (
+      <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <CameraCapture 
           onCapture={handleCameraCapture} 
-          onClose={() => setShowCamera(false)} 
+          isAnalyzing={isAnalyzing}
         />
-      )}
+        {error && <div className={styles.errorMessage}>{error}</div>}
+      </div>
     </main>
   );
 }

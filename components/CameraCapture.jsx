@@ -1,9 +1,9 @@
 import { useRef, useCallback, useState } from 'react';
 import Webcam from 'react-webcam';
-import { X, Camera as CameraIcon, SwitchCamera } from 'lucide-react';
+import { Loader2, Camera as CameraIcon, SwitchCamera } from 'lucide-react';
 import styles from './CameraCapture.module.css';
 
-export default function CameraCapture({ onCapture, onClose }) {
+export default function CameraCapture({ onCapture, isAnalyzing }) {
   const webcamRef = useRef(null);
   const [facingMode, setFacingMode] = useState("environment");
 
@@ -19,35 +19,26 @@ export default function CameraCapture({ onCapture, onClose }) {
   };
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <div className={styles.header}>
-          <h3>Snap Label</h3>
-          <button onClick={onClose} className={styles.iconButton}>
-            <X size={24} />
-          </button>
-        </div>
-        
-        <div className={styles.cameraWrapper}>
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            videoConstraints={{ facingMode }}
-            className={styles.webcam}
-          />
-        </div>
+    <div className={styles.inlineContainer}>
+      <div className={styles.cameraWrapper}>
+        <Webcam
+          audio={false}
+          ref={webcamRef}
+          screenshotFormat="image/jpeg"
+          videoConstraints={{ facingMode }}
+          className={styles.webcam}
+        />
+      </div>
 
-        <div className={styles.controls}>
-          <button onClick={toggleCamera} className={styles.secondaryButton}>
-            <SwitchCamera size={20} />
-          </button>
-          
-          <button onClick={capture} className={styles.captureButton}>
-            <CameraIcon size={24} />
-            <span>Capture</span>
-          </button>
-        </div>
+      <div className={styles.controls}>
+        <button onClick={toggleCamera} className={styles.secondaryButton} disabled={isAnalyzing}>
+          <SwitchCamera size={20} />
+        </button>
+        
+        <button onClick={capture} className={styles.captureButton} disabled={isAnalyzing}>
+          {isAnalyzing ? <Loader2 size={24} className={styles.spinner} /> : <CameraIcon size={24} />}
+          <span>{isAnalyzing ? 'Analyzing...' : 'Snap Food'}</span>
+        </button>
       </div>
     </div>
   );

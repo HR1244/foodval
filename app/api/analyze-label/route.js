@@ -1,4 +1,4 @@
-import Groq from 'groq-sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
@@ -12,12 +12,13 @@ export async function POST(req) {
     // Strip the data:image/...;base64, prefix if present
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: 'GROQ_API_KEY is not configured on the server.' }, { status: 500 });
+      return NextResponse.json({ error: 'GEMINI_API_KEY is not configured on the server.' }, { status: 500 });
     }
 
-    const groq = new Groq({ apiKey });
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const prompt = `
       You are an expert food nutritionist and label reader specializing in the Indian market. I have provided an image of a product.
@@ -68,28 +69,22 @@ export async function POST(req) {
       Respond ONLY with the JSON object. Do not wrap it in markdown block quotes (\`\`\`json). Just return the raw JSON.
     `;
 
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: prompt },
-            { 
-              type: "image_url", 
-              image_url: { url: `data:image/jpeg;base64,${base64Data}` } 
-            }
-          ]
-        }
-      ],
-      model: "qwen/qwen3.6-27b",
-    });
-    const responseText = chatCompletion.choices[0].message.content;
+    const imagePart = {
+      inlineData: {
+        data: base64Data,
+        mimeType: "image/jpeg" 
+      }
+    };
+
+    const result = await model.generateContent([prompt, imagePart]);
+    const responseText = result.response.text();
     
     // Parse the JSON from the response
     let productData;
     try {
-      const cleanText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-      productData = JSON.parse(cleanText);
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("No JSON object found");
+      productData = JSON.parse(jsonMatch[0]);
       
       if (productData.error) {
         return NextResponse.json({ error: productData.error }, { status: 400 });
