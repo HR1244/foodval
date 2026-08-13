@@ -17,8 +17,9 @@ export async function POST(req) {
     const groq = new Groq({ apiKey });
 
     const prompt = `
-      You are an expert food nutritionist. I will provide you with the name of a product (usually Indian).
+      You are an expert food nutritionist specializing in the Indian market. I will provide you with the name of a packaged food product.
       
+      CRITICAL RULE: Assume the product is sold in India. If the brand is ambiguous, assume it's the Indian variant (e.g., Britannia, Parle, ITC, Amul, Haldiram's, Nestle India, etc.).
       CRITICAL RULE: First, determine if the product is an EDIBLE food or beverage meant for human consumption. 
       If it is a non-food item (like toothpaste, shampoo, electronics, poison, etc.), you MUST return exactly this JSON:
       { "error": "This item does not appear to be a food or beverage product." }

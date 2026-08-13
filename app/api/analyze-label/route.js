@@ -20,8 +20,9 @@ export async function POST(req) {
     const groq = new Groq({ apiKey });
 
     const prompt = `
-      You are an expert food nutritionist and label reader. I have provided an image of a product (which may contain the front label, ingredients list, or nutrition facts).
+      You are an expert food nutritionist and label reader specializing in the Indian market. I have provided an image of a product.
       
+      CRITICAL RULE: Assume this is a packaged food product sold in India. Focus on common Indian ingredients like Maida, Palm Oil, and Indian food standards (FSSAI).
       CRITICAL RULE: First, determine if the product is an EDIBLE food or beverage meant for human consumption. 
       If it is a non-food item (like toothpaste, shampoo, electronics, poison, etc.), you MUST return exactly this JSON:
       { "error": "This item does not appear to be a food or beverage product." }
