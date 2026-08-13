@@ -94,8 +94,8 @@ export async function POST(req) {
         return NextResponse.json({ error: productData.error }, { status: 400 });
       }
 
-      // Ensure we have a placeholder image since we can't extract one
-      productData.image = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=300&auto=format&fit=crop'; 
+      // Use the originally snapped image instead of a placeholder
+      productData.image = imageBase64; 
       
     } catch (e) {
       console.error("Failed to parse Gemini response:", responseText);

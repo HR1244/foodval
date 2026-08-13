@@ -2,44 +2,21 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, ScanLine, Camera, Loader2, Sparkles } from 'lucide-react';
+import { Search, Camera, Loader2, Sparkles } from 'lucide-react';
 import styles from './page.module.css';
-import { searchProducts, getProductByBarcode } from '../lib/mockDatabase';
-import ProductCard from '../components/ProductCard';
-import Scanner from '../components/Scanner';
 import CameraCapture from '../components/CameraCapture';
-import MockAd from '../components/MockAd';
 
 export default function Home() {
   const router = useRouter();
   
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [showScanner, setShowScanner] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [error, setError] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isAiSearching, setIsAiSearching] = useState(false);
 
   const handleSearch = (e) => {
-    const val = e.target.value;
-    setQuery(val);
-    if (val.trim() === '') {
-      setResults([]);
-    } else {
-      setResults(searchProducts(val));
-    }
-  };
-
-  const handleScan = (barcode) => {
-    setShowScanner(false);
-    const product = getProductByBarcode(barcode);
-    if (product) {
-      router.push(`/product/${product.id}`);
-    } else {
-      setError(`Product with barcode ${barcode} not found in database.`);
-      setTimeout(() => setError(''), 5000);
-    }
+    setQuery(e.target.value);
   };
 
   const handleCameraCapture = async (base64Data) => {
@@ -76,7 +53,7 @@ export default function Home() {
 
   const handleAiSearch = async () => {
     if (!query.trim()) {
-      setError('Please type a product name to search with AI.');
+      setError('Please type a product name to search.');
       setTimeout(() => setError(''), 5000);
       return;
     }
@@ -105,7 +82,7 @@ export default function Home() {
       
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Error searching product with AI. Please try again.');
+      setError(err.message || 'Error searching product. Please try again.');
       setIsAiSearching(false);
     }
   };
@@ -140,22 +117,13 @@ export default function Home() {
             className={styles.aiSearchButton}
             onClick={handleAiSearch}
             disabled={isAiSearching || !query.trim()}
-            title="Generate nutrition info with AI"
+            title="Generate nutrition info"
           >
             {isAiSearching ? <Loader2 size={20} className={styles.spinner} /> : <Sparkles size={20} />}
           </button>
         </div>
         
         <div className={styles.actionButtons}>
-          <button 
-            className={styles.scanButton}
-            onClick={() => setShowScanner(true)}
-            disabled={isAnalyzing}
-          >
-            <ScanLine size={20} />
-            <span>Barcode</span>
-          </button>
-
           <button 
             className={`${styles.scanButton} ${styles.aiButton}`}
             onClick={() => setShowCamera(true)}
@@ -166,7 +134,7 @@ export default function Home() {
             ) : (
               <Camera size={20} />
             )}
-            <span>{isAnalyzing ? 'Analyzing...' : 'Snap Label (AI)'}</span>
+            <span>{isAnalyzing ? 'Analyzing...' : 'Snap Food'}</span>
           </button>
         </div>
       </div>
@@ -174,29 +142,12 @@ export default function Home() {
       {error && <div className={styles.errorMessage}>{error}</div>}
 
       <div className={styles.resultsContainer}>
-        {query && results.length === 0 && !error && (
-          <p className={styles.noResults}>No products found for "{query}".</p>
-        )}
-        
-        {results.map(product => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-        
-        {!query && results.length === 0 && !isAnalyzing && (
+        {!query && !isAnalyzing && (
           <div className={styles.demoSuggestions}>
-            <p>Try searching for: <strong>Maggi</strong> or snap a label!</p>
+            <p>Try searching for: <strong>Maggi</strong> or snap food!</p>
           </div>
         )}
-
-        {results.length > 0 && <MockAd />}
       </div>
-
-      {showScanner && (
-        <Scanner 
-          onScan={handleScan} 
-          onClose={() => setShowScanner(false)} 
-        />
-      )}
 
       {showCamera && (
         <CameraCapture 

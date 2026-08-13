@@ -41,7 +41,7 @@ export default function ScanResultsPage() {
   if (!product) {
     return (
       <div className={styles.notFound}>
-        <h2>No AI scan results found</h2>
+        <h2>No scan results found</h2>
         <p>It looks like you haven't scanned anything recently.</p>
         <Link href="/" className={styles.backLink}>Go back home</Link>
       </div>
@@ -56,7 +56,7 @@ export default function ScanResultsPage() {
         <button onClick={() => router.push('/')} className={styles.backButton}>
           <ArrowLeft size={24} />
         </button>
-        <span className={styles.headerTitle}>AI Scan Results</span>
+        <span className={styles.headerTitle}>Scan Results</span>
       </header>
 
       <div className={styles.productHero}>
